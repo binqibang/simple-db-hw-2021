@@ -33,13 +33,18 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
+    private int numPages;
+
+    private ConcurrentHashMap<Integer, Page> pages;
+
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
      * @param numPages maximum number of pages in this buffer pool.
      */
     public BufferPool(int numPages) {
-        // some code goes here
+        this.pages = new ConcurrentHashMap<>(numPages);
+        this.numPages = numPages;
     }
     
     public static int getPageSize() {
@@ -71,10 +76,21 @@ public class BufferPool {
      * @param pid the ID of the requested page
      * @param perm the requested permissions on the page
      */
-    public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
+    public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        Page res = this.pages.get(pid.hashCode());
+        // if it is not present
+        if (res == null) {
+            // insufficient space in the buffer pool
+            if (this.pages.size() >= DEFAULT_PAGE_SIZE) {
+                // remove one page
+                throw new DbException("Not Implemented for lab1");
+            }
+            DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
+            res = file.readPage(pid);
+            this.pages.put(pid.hashCode(), res);
+        }
+        return res;
     }
 
     /**
@@ -86,7 +102,7 @@ public class BufferPool {
      * @param tid the ID of the transaction requesting the unlock
      * @param pid the ID of the page to unlock
      */
-    public  void unsafeReleasePage(TransactionId tid, PageId pid) {
+    public void unsafeReleasePage(TransactionId tid, PageId pid) {
         // some code goes here
         // not necessary for lab1|lab2
     }
@@ -177,7 +193,7 @@ public class BufferPool {
         cache.
         
         Also used by B+ tree files to ensure that deleted pages
-        are removed from the cache so they can be reused safely
+        are removed from the cache, so they can be reused safely
     */
     public synchronized void discardPage(PageId pid) {
         // some code goes here
@@ -204,7 +220,7 @@ public class BufferPool {
      * Discards a page from the buffer pool.
      * Flushes the page to disk to ensure dirty pages are updated on disk.
      */
-    private synchronized  void evictPage() throws DbException {
+    private synchronized void evictPage() throws DbException {
         // some code goes here
         // not necessary for lab1
     }

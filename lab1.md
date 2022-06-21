@@ -287,7 +287,7 @@ public boolean deleteTuple(Tuple t)throws DbException{
         // some code goes here
         // not necessary for lab1
         return false;
-        }
+}
 ```
 
 The code that you submit should compile without having to modify these methods.
@@ -451,7 +451,7 @@ access method, and we have written some of the code for you.
 
 <p>
 
-A `HeapFile` object is arranged into a set of pages, each of which consists of a fixed number of bytes for storing
+A `HeapFile` object is arranged into **a set of pages**, each of which consists of a fixed number of bytes for storing
 tuples, (defined by the constant `BufferPool.DEFAULT_PAGE_SIZE`), including a header. In SimpleDB, there is
 one `HeapFile` object for each table in the database. Each page in a `HeapFile` is arranged as a set of slots, each of
 which can hold one tuple (tuples for a given table in SimpleDB are all of the same size). In addition to these slots,
@@ -548,10 +548,10 @@ To read a page from disk, you will first need to calculate the correct offset in
 access to the file in order to read and write pages at arbitrary offsets. You should not call BufferPool methods when
 reading a page from disk.
 
-<p> 
-You will also need to implement the `HeapFile.iterator()` method, which should iterate through through the tuples of each page in the HeapFile. The iterator must use the `BufferPool.getPage()` method to access pages in the `HeapFile`. This method loads the page into the buffer pool and will eventually be used (in a later lab) to implement locking-based concurrency control and recovery.  Do not load the entire table into memory on the open() call -- this will cause an out of memory error for very large tables.
 
-<p>
+You will also need to implement the `HeapFile.iterator()` method, which should iterate through the tuples of each page in the HeapFile. The iterator must use the `BufferPool.getPage()` method to access pages in the `HeapFile`. This method loads the page into the buffer pool and will eventually be used (in a later lab) to implement locking-based concurrency control and recovery.  Do not load the entire table into memory on the open() call -- this will cause an out of memory error for very large tables.
+
+
 
 At this point, your code should pass the unit tests in HeapFileReadTest.
 

@@ -23,25 +23,44 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Catalog {
 
+    public class Table {
+        private DbFile dbFile;
+        private String name;
+        private String pkeyField;
+
+        public Table(DbFile dbFile, String name, String pkeyField) {
+            this.dbFile = dbFile;
+            this.name = name;
+            this.pkeyField = pkeyField;
+        }
+    }
+
+    private ConcurrentHashMap<Integer, Table> tables;
+
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
     public Catalog() {
-        // some code goes here
+        this.tables = new ConcurrentHashMap<>();
     }
 
     /**
      * Add a new table to the catalog.
      * This table's contents are stored in the specified DbFile.
-     * @param file the contents of the table to add;  file.getId() is the identfier of
+     * @param file the contents of the table to add;  file.getId() is the identifier of
      *    this file/tupledesc param for the calls getTupleDesc and getFile
      * @param name the name of the table -- may be an empty string.  May not be null.  If a name
      * conflict exists, use the last table to be added as the table for a given name.
      * @param pkeyField the name of the primary key field
      */
     public void addTable(DbFile file, String name, String pkeyField) {
-        // some code goes here
+        for (Map.Entry<Integer, Table> entry : tables.entrySet()) {
+            if (entry.getValue().name.equals(name)) {
+                this.tables.remove(entry.getKey());
+            }
+        }
+        this.tables.put(file.getId(), new Table(file, name, pkeyField));
     }
 
     public void addTable(DbFile file, String name) {
@@ -52,7 +71,7 @@ public class Catalog {
      * Add a new table to the catalog.
      * This table has tuples formatted using the specified TupleDesc and its
      * contents are stored in the specified DbFile.
-     * @param file the contents of the table to add;  file.getId() is the identfier of
+     * @param file the contents of the table to add;  file.getId() is the identifier of
      *    this file/tupledesc param for the calls getTupleDesc and getFile
      */
     public void addTable(DbFile file) {
@@ -64,8 +83,12 @@ public class Catalog {
      * @throws NoSuchElementException if the table doesn't exist
      */
     public int getTableId(String name) throws NoSuchElementException {
-        // some code goes here
-        return 0;
+        for (Map.Entry<Integer, Table> entry : tables.entrySet()) {
+            if (entry.getValue().name.equals(name)) {
+                return entry.getKey();
+            }
+        }
+        throw new NoSuchElementException();
     }
 
     /**
@@ -75,8 +98,11 @@ public class Catalog {
      * @throws NoSuchElementException if the table doesn't exist
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
-        // some code goes here
-        return null;
+        try {
+            return this.tables.get(tableid).dbFile.getTupleDesc();
+        } catch (Exception e) {
+            throw new NoSuchElementException();
+        }
     }
 
     /**
@@ -86,28 +112,36 @@ public class Catalog {
      *     function passed to addTable
      */
     public DbFile getDatabaseFile(int tableid) throws NoSuchElementException {
-        // some code goes here
-        return null;
+        try {
+            return this.tables.get(tableid).dbFile;
+        } catch (Exception e) {
+            throw new NoSuchElementException();
+        }
     }
 
     public String getPrimaryKey(int tableid) {
-        // some code goes here
-        return null;
+        try {
+            return this.tables.get(tableid).pkeyField;
+        } catch (Exception e) {
+            throw new NoSuchElementException();
+        }
     }
 
     public Iterator<Integer> tableIdIterator() {
-        // some code goes here
-        return null;
+        return this.tables.keySet().iterator();
     }
 
     public String getTableName(int id) {
-        // some code goes here
-        return null;
+        try {
+            return this.tables.get(id).name;
+        } catch (Exception e) {
+            throw new NoSuchElementException();
+        }
     }
     
     /** Delete all tables from the catalog */
     public void clear() {
-        // some code goes here
+        this.tables.clear();
     }
     
     /**
@@ -121,9 +155,9 @@ public class Catalog {
             BufferedReader br = new BufferedReader(new FileReader(catalogFile));
             
             while ((line = br.readLine()) != null) {
-                //assume line is of the format name (field type, field type, ...)
+                // assume line is of the format name (field type, field type, ...)
                 String name = line.substring(0, line.indexOf("(")).trim();
-                //System.out.println("TABLE NAME: " + name);
+                // System.out.println("TABLE NAME: " + name);
                 String fields = line.substring(line.indexOf("(") + 1, line.indexOf(")")).trim();
                 String[] els = fields.split(",");
                 ArrayList<String> names = new ArrayList<>();
@@ -132,18 +166,18 @@ public class Catalog {
                 for (String e : els) {
                     String[] els2 = e.trim().split(" ");
                     names.add(els2[0].trim());
-                    if (els2[1].trim().equalsIgnoreCase("int"))
+                    if (els2[1].trim().equalsIgnoreCase("int")) {
                         types.add(Type.INT_TYPE);
-                    else if (els2[1].trim().equalsIgnoreCase("string"))
+                    } else if (els2[1].trim().equalsIgnoreCase("string")) {
                         types.add(Type.STRING_TYPE);
-                    else {
+                    } else {
                         System.out.println("Unknown type " + els2[1]);
                         System.exit(0);
                     }
                     if (els2.length == 3) {
-                        if (els2[2].trim().equals("pk"))
+                        if (els2[2].trim().equals("pk")) {
                             primaryKey = els2[0].trim();
-                        else {
+                        } else {
                             System.out.println("Unknown annotation " + els2[2]);
                             System.exit(0);
                         }

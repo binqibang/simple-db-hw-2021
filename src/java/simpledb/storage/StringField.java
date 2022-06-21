@@ -30,22 +30,28 @@ public class StringField implements Field {
 	public StringField(String s, int maxSize) {
 		this.maxSize = maxSize;
 
-		if (s.length() > maxSize)
+		if (s.length() > maxSize) {
 			value = s.substring(0, maxSize);
-		else
+		} else {
 			value = s;
+		}
 	}
 
+	@Override
 	public String toString() {
 		return value;
 	}
 
+	@Override
 	public int hashCode() {
 		return value.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object field) {
-	    if (!(field instanceof StringField)) return false;
+	    if (!(field instanceof StringField)) {
+			return false;
+		}
 		return ((StringField) field).value.equals(value);
 	}
 
@@ -57,6 +63,7 @@ public class StringField implements Field {
 	 * @param dos
 	 *            Where the string is written
 	 */
+	@Override
 	public void serialize(DataOutputStream dos) throws IOException {
 		String s = value;
 		int overflow = maxSize - s.length();
@@ -65,8 +72,9 @@ public class StringField implements Field {
 		}
 		dos.writeInt(s.length());
 		dos.writeBytes(s);
-		while (overflow-- > 0)
+		while (overflow-- > 0) {
 			dos.write((byte) 0);
+		}
 	}
 
 	/**
@@ -77,6 +85,7 @@ public class StringField implements Field {
 	 *             if val is not a StringField
 	 * @see Field#compare
 	 */
+	@Override
 	public boolean compare(Predicate.Op op, Field val) {
 
 		StringField iVal = (StringField) val;
@@ -111,6 +120,7 @@ public class StringField implements Field {
 	/**
 	 * @return the Type for this Field
 	 */
+	@Override
 	public Type getType() {
 
 		return Type.STRING_TYPE;

@@ -21,7 +21,7 @@ public interface Field extends Serializable{
      * Compare the value of this field object to the passed in value.
      * @param op The operator
      * @param value The value to compare this Field to
-     * @return Whether or not the comparison yields true.
+     * @return Whether the comparison yields true.
      */
     boolean compare(Predicate.Op op, Field value);
 
