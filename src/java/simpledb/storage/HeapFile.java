@@ -75,10 +75,10 @@ public class HeapFile implements DbFile {
             byte[] bytes = new byte[BufferPool.getPageSize()];
             try {
                 // set the start pointer of file to read
-                rFile.seek(pid.getPageNumber() * BufferPool.getPageSize());
+                rFile.seek((long) pid.getPageNumber() * BufferPool.getPageSize());
                 // read file's content into bytes array
                 if (rFile.read(bytes) == -1) {
-                    throw new IllegalArgumentException(String.format("No more data for ( table %d, page %d)", pid.getPageNumber(), pid.getTableId()));
+                    throw new IllegalArgumentException(String.format("No more data for ( table %d, page %d)", pid.getTableId(), pid.getPageNumber()));
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -18,7 +18,7 @@ public class HeapFileIterator implements DbFileIterator{
     private Iterator<Tuple> currTupleIter;
 
     private boolean hasNextPage() {
-        return pageNo >=0 && pageNo < heapFile.numPages();
+        return pageNo >= 0 && pageNo < heapFile.numPages();
     }
 
     private Iterator<Tuple> NextTupleIter() throws DbException {

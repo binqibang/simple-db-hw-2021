@@ -1,6 +1,5 @@
 package simpledb.common;
 
-import simpledb.common.Type;
 import simpledb.storage.DbFile;
 import simpledb.storage.HeapFile;
 import simpledb.storage.TupleDesc;
@@ -23,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Catalog {
 
-    public class Table {
+    public static class Table {
         private DbFile dbFile;
         private String name;
         private String pkeyField;
@@ -75,7 +74,7 @@ public class Catalog {
      *    this file/tupledesc param for the calls getTupleDesc and getFile
      */
     public void addTable(DbFile file) {
-        addTable(file, (UUID.randomUUID()).toString());
+        addTable(file, "");
     }
 
     /**
@@ -101,6 +100,7 @@ public class Catalog {
         try {
             return this.tables.get(tableid).dbFile.getTupleDesc();
         } catch (Exception e) {
+            // if no table for given tableid
             throw new NoSuchElementException();
         }
     }

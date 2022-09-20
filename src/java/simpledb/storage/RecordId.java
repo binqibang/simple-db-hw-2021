@@ -65,10 +65,8 @@ public class RecordId implements Serializable {
      */
     @Override
     public int hashCode() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(pageId);
-        builder.append(tupleNumber);
-        return builder.toString().hashCode();
+        String code = String.valueOf(pageId) + tupleNumber;
+        return code.hashCode();
     }
 
 }

@@ -38,10 +38,8 @@ public class HeapPageId implements PageId {
      * @see BufferPool
      */
     public int hashCode() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(this.tableId);
-        builder.append(this.pageNumber);
-        return builder.toString().hashCode();
+        String code = String.valueOf(this.tableId) + this.pageNumber;
+        return code.hashCode();
     }
 
     /**
