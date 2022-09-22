@@ -7,3 +7,6 @@ out/
 .DS_Store
 *.zip
 dist/
+some_data_file.txt
+some_data_file.dat
+src/java/simpledb/Demo.java
