@@ -41,7 +41,7 @@ public class TupleDesc implements Serializable {
     /**
      * Use ArrayList to reference all the TDItems
      */
-    private ArrayList<TDItem> tdItems;
+    private List<TDItem> tdItems;
     
     /**
      * @return

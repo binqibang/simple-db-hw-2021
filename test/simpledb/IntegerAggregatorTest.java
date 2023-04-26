@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import simpledb.common.Type;
 import simpledb.execution.Aggregator;
-import simpledb.execution.IntegerAggregator;
+import simpledb.execution.IntAggregator;
 import simpledb.execution.OpIterator;
 import simpledb.systemtest.SimpleDbTestBase;
 
@@ -72,7 +72,7 @@ public class IntegerAggregatorTest extends SimpleDbTestBase {
    */
   @Test public void mergeSum() throws Exception {
     scan1.open();
-    IntegerAggregator agg = new IntegerAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.SUM);
+    IntAggregator agg = new IntAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.SUM);
     
     for (int[] step : sum) {
       agg.mergeTupleIntoGroup(scan1.next());
@@ -87,7 +87,7 @@ public class IntegerAggregatorTest extends SimpleDbTestBase {
    */
   @Test public void mergeMin() throws Exception {
     scan1.open();
-    IntegerAggregator agg = new IntegerAggregator(0,Type.INT_TYPE,  1, Aggregator.Op.MIN);
+    IntAggregator agg = new IntAggregator(0,Type.INT_TYPE,  1, Aggregator.Op.MIN);
 
     OpIterator it;
     for (int[] step : min) {
@@ -103,7 +103,7 @@ public class IntegerAggregatorTest extends SimpleDbTestBase {
    */
   @Test public void mergeMax() throws Exception {
     scan1.open();
-    IntegerAggregator agg = new IntegerAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.MAX);
+    IntAggregator agg = new IntAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.MAX);
 
     OpIterator it;
     for (int[] step : max) {
@@ -119,7 +119,7 @@ public class IntegerAggregatorTest extends SimpleDbTestBase {
    */
   @Test public void mergeAvg() throws Exception {
     scan1.open();
-    IntegerAggregator agg = new IntegerAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.AVG);
+    IntAggregator agg = new IntAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.AVG);
 
     OpIterator it;
     for (int[] step : avg) {
@@ -136,7 +136,7 @@ public class IntegerAggregatorTest extends SimpleDbTestBase {
   @Test public void testIterator() throws Exception {
     // first, populate the aggregator via sum over scan1
     scan1.open();
-    IntegerAggregator agg = new IntegerAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.SUM);
+    IntAggregator agg = new IntAggregator(0, Type.INT_TYPE, 1, Aggregator.Op.SUM);
     try {
       while (true)
         agg.mergeTupleIntoGroup(scan1.next());

@@ -4,7 +4,6 @@ import simpledb.transaction.TransactionAbortedException;
 import simpledb.common.DbException;
 import simpledb.storage.Tuple;
 import simpledb.storage.TupleDesc;
-import sun.misc.LRUCache;
 
 import java.util.*;
 
@@ -18,7 +17,7 @@ public class Join extends Operator {
     private JoinPredicate predicate;
     private OpIterator child1;
     private OpIterator child2;
-    private Tuple left;
+    private Tuple t1;
 
     /**
      * Constructor. Accepts two children to join and the predicate to join them
@@ -35,7 +34,7 @@ public class Join extends Operator {
         this.predicate = predicate;
         this.child1 = child1;
         this.child2 = child2;
-        left = null;
+        t1 = null;
     }
 
     public JoinPredicate getJoinPredicate() {
@@ -84,7 +83,7 @@ public class Join extends Operator {
     public void rewind() throws DbException, TransactionAbortedException {
         child1.rewind();
         child2.rewind();
-        left = null;
+        t1 = null;
     }
 
     /**
@@ -106,29 +105,31 @@ public class Join extends Operator {
      * @see JoinPredicate#filter
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        while (child1.hasNext() || left != null) {
-            if (child1.hasNext() && left == null) {
-                left = child1.next();
+        while (child1.hasNext() || t1 != null) {
+            if (child1.hasNext() && t1 == null) {
+                t1 = child1.next();
             }
             while (child2.hasNext()) {
-                Tuple right = child2.next();
-                if (predicate.filter(left, right)) {
-                    Tuple next = new Tuple(getTupleDesc());
-                    for (int i = 0; i < getTupleDesc().numFields(); i++) {
-                        int n1 = left.getTupleDesc().numFields();
-                        if (i < n1) {  // left -> new
-                            next.setField(i, left.getField(i));
-                        } else {    // right -> new
-                            next.setField(i, right.getField(i - n1));
-                        }
+                Tuple t2 = child2.next();
+                if (predicate.filter(t1, t2)) {
+                    Tuple newTuple = new Tuple(getTupleDesc());
+                    newTuple.setRecordId(t1.getRecordId());
+                    int n1 = t1.getTupleDesc().numFields();
+                    int n2 = t2.getTupleDesc().numFields();
+                    int i = 0;
+                    for (; i < n1; i++) {       // t1 -> newTuple
+                        newTuple.setField(i, t1.getField(i));
                     }
-                    return next;
+                    for (; i < n1 + n2; i++) {  // t2 -> newTuple
+                        newTuple.setField(i, t2.getField(i - n1));
+                    }
+                    return newTuple;
                 }
             }
             // current left tuple compared all right tuples of child2,
             // then reset child2 and fetch next left tuple
             child2.rewind();
-            left = null;
+            t1 = null;
         }
         return null;
     }

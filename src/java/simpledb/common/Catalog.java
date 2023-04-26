@@ -34,7 +34,7 @@ public class Catalog {
         }
     }
 
-    private ConcurrentHashMap<Integer, Table> tables;
+    private Map<Integer, Table> tables;
 
     /**
      * Constructor.
@@ -150,7 +150,7 @@ public class Catalog {
      */
     public void loadSchema(String catalogFile) {
         String line = "";
-        String baseFolder=new File(new File(catalogFile).getAbsolutePath()).getParent();
+        String baseFolder = new File(new File(catalogFile).getAbsolutePath()).getParent();
         try {
             BufferedReader br = new BufferedReader(new FileReader(catalogFile));
             
@@ -187,7 +187,7 @@ public class Catalog {
                 String[] namesAr = names.toArray(new String[0]);
                 TupleDesc t = new TupleDesc(typeAr, namesAr);
                 HeapFile tabHf = new HeapFile(new File(baseFolder+"/"+name + ".dat"), t);
-                addTable(tabHf,name,primaryKey);
+                addTable(tabHf, name, primaryKey);
                 System.out.println("Added table : " + name + " with schema " + t);
             }
         } catch (IOException e) {

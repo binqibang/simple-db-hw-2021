@@ -3,6 +3,7 @@ package simpledb.storage;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Tuple maintains information about the contents of a tuple. Tuples have a
@@ -15,7 +16,7 @@ public class Tuple implements Serializable {
 
     private TupleDesc tupleDesc;
     private RecordId recordId;
-    private ArrayList<Field> fields;
+    private List<Field> fields;
 
     /**
      * Create a new tuple with the specified schema (type).
@@ -80,7 +81,7 @@ public class Tuple implements Serializable {
      * Returns the contents of this Tuple as a string. Note that to pass the
      * system tests, the format needs to be as follows:
      *
-     * column1\tcolumn2\tcolumn3\t...\tcolumnN
+     * column1\t column2\t column3\t...\t columnN
      *
      * where \t is any whitespace (except a newline)
      */
