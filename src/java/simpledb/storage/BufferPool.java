@@ -3,12 +3,13 @@ package simpledb.storage;
 import simpledb.common.Database;
 import simpledb.common.Permissions;
 import simpledb.common.DbException;
-import simpledb.common.DeadlockException;
 import simpledb.transaction.TransactionAbortedException;
 import simpledb.transaction.TransactionId;
 
 import java.io.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -35,7 +36,7 @@ public class BufferPool {
 
     private int numPages;
 
-    private ConcurrentHashMap<Integer, Page> pages;
+    private Map<PageId, Page> pageMap;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -43,7 +44,7 @@ public class BufferPool {
      * @param numPages maximum number of pages in this buffer pool.
      */
     public BufferPool(int numPages) {
-        this.pages = new ConcurrentHashMap<>(numPages);
+        this.pageMap = new ConcurrentHashMap<>(numPages);
         this.numPages = numPages;
     }
     
@@ -53,12 +54,12 @@ public class BufferPool {
     
     // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
     public static void setPageSize(int pageSize) {
-    	BufferPool.pageSize = pageSize;
+        BufferPool.pageSize = pageSize;
     }
     
     // THIS FUNCTION SHOULD ONLY BE USED FOR TESTING!!
     public static void resetPageSize() {
-    	BufferPool.pageSize = DEFAULT_PAGE_SIZE;
+        BufferPool.pageSize = DEFAULT_PAGE_SIZE;
     }
 
     /**
@@ -78,17 +79,17 @@ public class BufferPool {
      */
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        Page res = this.pages.get(pid.hashCode());
+        Page res = this.pageMap.get(pid);
         // if it is not present
         if (res == null) {
             // insufficient space in the buffer pool
-            if (this.pages.size() >= DEFAULT_PAGE_SIZE) {
+            if (this.pageMap.size() >= numPages) {
                 // remove one page
                 throw new DbException("Not Implemented for lab1");
             }
             DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
             res = file.readPage(pid);
-            this.pages.put(pid.hashCode(), res);
+            this.pageMap.put(pid, res);
         }
         return res;
     }
@@ -153,9 +154,11 @@ public class BufferPool {
      */
     public void insertTuple(TransactionId tid, int tableId, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        // not necessary for lab1
+        DbFile file = Database.getCatalog().getDatabaseFile(tableId);
+        List<Page> dirtyPages = file.insertTuple(tid, t);
+        updateBufferPool(dirtyPages, tid);
     }
+
 
     /**
      * Remove the specified tuple from the buffer pool.
@@ -172,8 +175,16 @@ public class BufferPool {
      */
     public  void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        // not necessary for lab1
+        DbFile file = Database.getCatalog().getDatabaseFile(t.getRecordId().getPageId().getTableId());
+        List<Page> dirtyPages = file.deleteTuple(tid, t);
+        updateBufferPool(dirtyPages, tid);
+    }
+
+    private void updateBufferPool(List<Page> dirtyPages, TransactionId tid) throws DbException {
+        for (Page page : dirtyPages) {
+            page.markDirty(true, tid);
+            pageMap.put(page.getId(), page);
+        }
     }
 
     /**

@@ -118,9 +118,11 @@ public class Aggregate extends Operator {
     public void open() throws NoSuchElementException, DbException,
             TransactionAbortedException {
         child.open();
+        // aggregate
         while (child.hasNext()) {
             aggregator.mergeTupleIntoGroup(child.next());
         }
+        // access aggregated result
         aggIterator = aggregator.iterator();
         aggIterator.open();
         super.open();
