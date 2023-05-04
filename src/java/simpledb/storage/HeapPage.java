@@ -275,7 +275,7 @@ public class HeapPage implements Page {
             throw new DbException("This page is full");
         }
         if (!td.equals(t.getTupleDesc())) {
-            throw new DbException("Not the same tupledesc");
+            throw new DbException("Tupledesc mismatch");
         }
         for (int i = 0; i < numSlots; i++) {
             if (!isSlotUsed(i)) {

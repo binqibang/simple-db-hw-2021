@@ -24,6 +24,47 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Threadsafe, all fields are final
  */
 public class BufferPool {
+
+    //------------- Double Linked Node -----------------//
+    private static class DLinkedNode {
+        PageId pid;
+        Page page;
+        DLinkedNode prev, next;
+
+        public DLinkedNode(PageId pid, Page page) {
+            this.pid = pid;
+            this.page = page;
+            prev = null;
+            next = null;
+        }
+    }
+
+    private void addFirst(DLinkedNode node) {
+        node.prev = head;
+        node.next = head.next;
+        head.next.prev = node;
+        head.next = node;
+    }
+
+    private void remove(DLinkedNode node){
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    private void moveToFirst(DLinkedNode node){
+        remove(node);
+        addFirst(node);
+    }
+
+    private DLinkedNode removeLast(){
+        DLinkedNode node = tail.prev;
+        remove(node);
+        return node;
+    }
+
+    //------------- Double Linked Node -----------------//
+
+
     /** Bytes per page, including header. */
     private static final int DEFAULT_PAGE_SIZE = 4096;
 
@@ -36,7 +77,8 @@ public class BufferPool {
 
     private int numPages;
 
-    private Map<PageId, Page> pageMap;
+    private Map<PageId, DLinkedNode> pageMap;
+    private DLinkedNode head, tail;
 
     /**
      * Creates a BufferPool that caches up to numPages pages.
@@ -46,6 +88,10 @@ public class BufferPool {
     public BufferPool(int numPages) {
         this.pageMap = new ConcurrentHashMap<>(numPages);
         this.numPages = numPages;
+        head = new DLinkedNode(new HeapPageId(-1, -1), null);
+        tail = new DLinkedNode(new HeapPageId(-1, -1), null);
+        head.next = tail;
+        tail.prev = head;
     }
     
     public static int getPageSize() {
@@ -79,19 +125,21 @@ public class BufferPool {
      */
     public Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        Page res = this.pageMap.get(pid);
+        DLinkedNode res = this.pageMap.get(pid);
         // if it is not present
         if (res == null) {
-            // insufficient space in the buffer pool
-            if (this.pageMap.size() >= numPages) {
-                // remove one page
-                throw new DbException("Not Implemented for lab1");
-            }
             DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
-            res = file.readPage(pid);
-            this.pageMap.put(pid, res);
+            Page page = file.readPage(pid);
+            // insufficient space in the buffer pool
+            if (pageMap.size() > numPages) {
+                evictPage();
+            }
+            res = new DLinkedNode(pid, page);
+            pageMap.put(pid, res);
+            addFirst(res);
         }
-        return res;
+        moveToFirst(res);
+        return res.page;
     }
 
     /**
@@ -173,7 +221,7 @@ public class BufferPool {
      * @param tid the transaction deleting the tuple.
      * @param t the tuple to delete
      */
-    public  void deleteTuple(TransactionId tid, Tuple t)
+    public void deleteTuple(TransactionId tid, Tuple t)
         throws DbException, IOException, TransactionAbortedException {
         DbFile file = Database.getCatalog().getDatabaseFile(t.getRecordId().getPageId().getTableId());
         List<Page> dirtyPages = file.deleteTuple(tid, t);
@@ -183,7 +231,13 @@ public class BufferPool {
     private void updateBufferPool(List<Page> dirtyPages, TransactionId tid) throws DbException {
         for (Page page : dirtyPages) {
             page.markDirty(true, tid);
-            pageMap.put(page.getId(), page);
+            if (pageMap.size() > numPages) {
+                evictPage();
+            }
+            DLinkedNode node = pageMap.get(page.getId());
+            // update page
+            node.page = page;
+            pageMap.put(page.getId(), node);
         }
     }
 
@@ -193,9 +247,9 @@ public class BufferPool {
      *     break simpledb if running in NO STEAL mode.
      */
     public synchronized void flushAllPages() throws IOException {
-        // some code goes here
-        // not necessary for lab1
-
+        for (PageId pageId : pageMap.keySet()) {
+            flushPage(pageId);
+        }
     }
 
     /** Remove the specific page id from the buffer pool.
@@ -207,22 +261,25 @@ public class BufferPool {
         are removed from the cache, so they can be reused safely
     */
     public synchronized void discardPage(PageId pid) {
-        // some code goes here
-        // not necessary for lab1
+        remove(pageMap.get(pid));
+        pageMap.remove(pid);
     }
 
     /**
      * Flushes a certain page to disk
      * @param pid an ID indicating the page to flush
      */
-    private synchronized  void flushPage(PageId pid) throws IOException {
-        // some code goes here
-        // not necessary for lab1
+    private synchronized void flushPage(PageId pid) throws IOException {
+        Page page = pageMap.get(pid).page;
+        if (page.isDirty() != null) {
+            Database.getCatalog().getDatabaseFile(pid.getTableId()).writePage(page);
+            page.markDirty(false, null);
+        }
     }
 
     /** Write all pages of the specified transaction to disk.
      */
-    public synchronized  void flushPages(TransactionId tid) throws IOException {
+    public synchronized void flushPages(TransactionId tid) throws IOException {
         // some code goes here
         // not necessary for lab1|lab2
     }
@@ -232,8 +289,14 @@ public class BufferPool {
      * Flushes the page to disk to ensure dirty pages are updated on disk.
      */
     private synchronized void evictPage() throws DbException {
-        // some code goes here
-        // not necessary for lab1
+        // LRU
+        DLinkedNode node = removeLast();
+        try {
+            flushPage(node.pid);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        pageMap.remove(node.pid);
     }
 
 }
