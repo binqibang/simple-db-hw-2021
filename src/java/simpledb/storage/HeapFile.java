@@ -81,7 +81,7 @@ public class HeapFile implements DbFile {
             rf.close();
             return new HeapPage(new HeapPageId(pid.getTableId(), pid.getPageNumber()), bytes);
         } catch (IOException e) {
-            throw new IllegalArgumentException(String.format("(table %d page %d) is invalid", pid.getTableId(), pid.getPageNumber()));
+            throw new IllegalArgumentException(e.getMessage());
         }
     }
 
@@ -159,7 +159,7 @@ public class HeapFile implements DbFile {
         @Override
         public void open() throws DbException, TransactionAbortedException {
             HeapPageId firstPageId = new HeapPageId(getId(),0);
-            currPage = (HeapPage) Database.getBufferPool().getPage(tid,firstPageId, Permissions.READ_ONLY);
+            currPage = (HeapPage) Database.getBufferPool().getPage(tid, firstPageId, Permissions.READ_ONLY);
             currTupleIter = currPage.iterator();
         }
 

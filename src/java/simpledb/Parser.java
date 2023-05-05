@@ -69,10 +69,10 @@ public class Parser {
             List<ZExp> ops = wx.getOperands();
             if (ops.size() != 2) {
                 throw new simpledb.ParsingException(
-                        "Only simple binary expresssions of the form A op B are currently supported.");
+                        "Only simple binary expressions of the form A op B are currently supported.");
             }
 
-            boolean isJoin = false;
+            boolean isJoin;
             Predicate.Op op = getOp(wx.getOperator());
 
             boolean op1const = ops.get(0) instanceof ZConstant; // otherwise
@@ -90,13 +90,13 @@ public class Parser {
             } else if (ops.get(0) instanceof ZExpression
                     || ops.get(1) instanceof ZExpression) {
                 throw new simpledb.ParsingException(
-                        "Only simple binary expresssions of the form A op B are currently supported, where A or B are fields, constants, or subqueries.");
+                        "Only simple binary expressions of the form A op B are currently supported, where A or B are fields, constants, or subqueries.");
             } else
                 isJoin = false;
 
             if (isJoin) { // join node
 
-                String tab1field = "", tab2field = "";
+                String tab1field = "", tab2field;
 
                 if (!op1const) { // left op is a nested query
                     // generate a virtual table for the left op
@@ -451,7 +451,7 @@ public class Parser {
             case "SET TRANSACTION":
                 if (curtrans != null)
                     throw new ParsingException(
-                            "Can't start new transactions until current transaction has been committed or rolledback.");
+                            "Can't start new transactions until current transaction has been committed or rollback.");
                 curtrans = new Transaction();
                 curtrans.start();
                 inUserTrans = true;
@@ -643,10 +643,10 @@ public class Parser {
             ConsoleReader reader = new ConsoleReader();
 
             // Add really stupid tab completion for simple SQL
-            ArgumentCompletor completor = new ArgumentCompletor(
+            ArgumentCompletor completer = new ArgumentCompletor(
                     new SimpleCompletor(SQL_COMMANDS));
-            completor.setStrict(false); // match at any position
-            reader.addCompletor(completor);
+            completer.setStrict(false); // match at any position
+            reader.addCompletor(completer);
 
             StringBuilder buffer = new StringBuilder();
             String line;

@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BufferPool {
 
     //------------- Double Linked Node -----------------//
+
     private static class DLinkedNode {
         PageId pid;
         Page page;
@@ -130,13 +131,12 @@ public class BufferPool {
         if (res == null) {
             DbFile file = Database.getCatalog().getDatabaseFile(pid.getTableId());
             Page page = file.readPage(pid);
-            // insufficient space in the buffer pool
-            if (pageMap.size() > numPages) {
-                evictPage();
-            }
             res = new DLinkedNode(pid, page);
             pageMap.put(pid, res);
             addFirst(res);
+            if (pageMap.size() > numPages) {
+                evictPage();
+            }
         }
         moveToFirst(res);
         return res.page;
@@ -231,13 +231,11 @@ public class BufferPool {
     private void updateBufferPool(List<Page> dirtyPages, TransactionId tid) throws DbException {
         for (Page page : dirtyPages) {
             page.markDirty(true, tid);
-            if (pageMap.size() > numPages) {
-                evictPage();
-            }
             DLinkedNode node = pageMap.get(page.getId());
             // update page
             node.page = page;
             pageMap.put(page.getId(), node);
+            moveToFirst(node);
         }
     }
 

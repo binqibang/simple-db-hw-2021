@@ -1,12 +1,12 @@
 log
 bin/
-out/
+data/
 *.db
 *.iml
 .idea/
 .DS_Store
 *.zip
 dist/
-some_data_file.txt
-some_data_file.dat
-src/java/simpledb/Demo.java
+data/some_data_file.txt
+data/some_data_file.dat
+/src/java/simpledb/TestLab*
