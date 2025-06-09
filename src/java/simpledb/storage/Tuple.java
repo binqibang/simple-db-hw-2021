@@ -80,9 +80,9 @@ public class Tuple implements Serializable {
     /**
      * Returns the contents of this Tuple as a string. Note that to pass the
      * system tests, the format needs to be as follows:
-     *
+     * <p>
      * column1\t column2\t column3\t...\t columnN
-     *
+     * <p>
      * where \t is any whitespace (except a newline)
      */
     @Override

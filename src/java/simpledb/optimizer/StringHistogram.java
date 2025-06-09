@@ -38,7 +38,7 @@ public class StringHistogram {
 
         // XXX: hack to avoid getting wrong results for
         // strings which don't output in the range min to max
-        if (!(s.equals("") || s.equals("zzzz"))) {
+        if (!(s.isEmpty() || "zzzz".equals(s))) {
             if (v < minVal()) {
                 v = minVal();
             }
@@ -61,7 +61,7 @@ public class StringHistogram {
         return stringToInt("");
     }
 
-    /** Add a new value to thte histogram */
+    /** Add a new value to the histogram */
     public void addValue(String s) {
         int val = stringToInt(s);
         hist.addValue(val);
@@ -83,7 +83,7 @@ public class StringHistogram {
 
     /**
      * @return the average selectivity of this histogram.
-     * 
+     * <p>
      *         This is not an indispensable method to implement the basic join
      *         optimization. It may be needed if you want to implement a more
      *         efficient optimization

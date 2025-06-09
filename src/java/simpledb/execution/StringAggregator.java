@@ -4,7 +4,6 @@ import simpledb.common.Type;
 import simpledb.storage.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +54,7 @@ public class StringAggregator implements Aggregator {
      * Merge a new tuple into the aggregate, grouping as indicated in the constructor
      * @param tup the Tuple containing an aggregate field and a group-by field
      */
+    @Override
     public void mergeTupleIntoGroup(Tuple tup) {
         Field gbField = gbfield == NO_GROUPING ? null : tup.getField(gbfield);
         Field aggField = tup.getField(afield);
@@ -69,6 +69,7 @@ public class StringAggregator implements Aggregator {
      *   grouping. The aggregateVal is determined by the type of
      *   aggregate specified in the constructor.
      */
+    @Override
     public OpIterator iterator() {
         List<Tuple> resTuples = new ArrayList<>();
         for (Map.Entry<Field, Integer> entry : handler.aggResult.entrySet()) {

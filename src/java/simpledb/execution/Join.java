@@ -63,10 +63,12 @@ public class Join extends Operator {
      * @see TupleDesc#merge(TupleDesc, TupleDesc) for possible
      *      implementation logic.
      */
+    @Override
     public TupleDesc getTupleDesc() {
         return TupleDesc.merge(child1.getTupleDesc(), child2.getTupleDesc());
     }
 
+    @Override
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
         super.open();
@@ -74,12 +76,14 @@ public class Join extends Operator {
         child2.open();
     }
 
+    @Override
     public void close() {
         child1.close();
         child2.close();
         super.close();
     }
 
+    @Override
     public void rewind() throws DbException, TransactionAbortedException {
         child1.rewind();
         child2.rewind();
@@ -104,6 +108,7 @@ public class Join extends Operator {
      * @return The next matching tuple.
      * @see JoinPredicate#filter
      */
+    @Override
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         while (child1.hasNext() || t1 != null) {
             if (child1.hasNext() && t1 == null) {

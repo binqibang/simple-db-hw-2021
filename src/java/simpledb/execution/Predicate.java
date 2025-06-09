@@ -31,21 +31,29 @@ public class Predicate implements Serializable {
             return values()[i];
         }
 
+        @Override
         public String toString() {
-            if (this == EQUALS)
+            if (this == EQUALS) {
                 return "=";
-            if (this == GREATER_THAN)
+            }
+            if (this == GREATER_THAN) {
                 return ">";
-            if (this == LESS_THAN)
+            }
+            if (this == LESS_THAN) {
                 return "<";
-            if (this == LESS_THAN_OR_EQ)
+            }
+            if (this == LESS_THAN_OR_EQ) {
                 return "<=";
-            if (this == GREATER_THAN_OR_EQ)
+            }
+            if (this == GREATER_THAN_OR_EQ) {
                 return ">=";
-            if (this == LIKE)
+            }
+            if (this == LIKE) {
                 return "LIKE";
-            if (this == NOT_EQUALS)
+            }
+            if (this == NOT_EQUALS) {
                 return "<>";
+            }
             throw new IllegalStateException("impossible to reach here");
         }
 
@@ -106,6 +114,7 @@ public class Predicate implements Serializable {
      * Returns something useful, like "f = field_id op = op_string operand =
      * operand_string"
      */
+    @Override
     public String toString() {
         return "f = " + field + " op = " + op.toString() + " operand = " + operand.toString();
     }

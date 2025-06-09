@@ -25,7 +25,7 @@ public class IntHistogramTest {
 			h.addValue((c * 23) % 101);	// Pseudo-random number; at least get a distribution
 		}
 		
-		// Try printing out all of the values; make sure "estimateSelectivity()"
+		// Try printing out all the values; make sure "estimateSelectivity()"
 		// cause any problems
 		double selectivity = 0.0;
 		for (int c = 0; c < 101; c++) {
@@ -44,7 +44,7 @@ public class IntHistogramTest {
 	@Test public void negativeRangeTest() {
 		IntHistogram h = new IntHistogram(10, -60, -10);
 		
-		// All of the values here are negative.
+		// All the values here are negative.
 		// Also, there are more of them than there are bins.
 		for (int c = -60; c <= -10; c++) {
 			h.addValue(c);

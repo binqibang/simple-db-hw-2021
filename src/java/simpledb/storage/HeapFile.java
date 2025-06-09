@@ -15,9 +15,9 @@ import java.util.*;
  * size, and the file is simply a collection of those pages. HeapFile works
  * closely with HeapPage. The format of HeapPages is described in the HeapPage
  * constructor.
- * 
- * @see HeapPage#HeapPage
+ *
  * @author Sam Madden
+ * @see HeapPage#HeapPage
  */
 public class HeapFile implements DbFile {
 
@@ -26,10 +26,9 @@ public class HeapFile implements DbFile {
 
     /**
      * Constructs a heap file backed by the specified file.
-     * 
-     * @param f
-     *            the file that stores the on-disk backing store for this heap
-     *            file.
+     *
+     * @param f the file that stores the on-disk backing store for this heap
+     *          file.
      */
     public HeapFile(File f, TupleDesc td) {
         this.file = f;
@@ -38,7 +37,7 @@ public class HeapFile implements DbFile {
 
     /**
      * Returns the File backing this HeapFile on disk.
-     * 
+     *
      * @return the File backing this HeapFile on disk.
      */
     public File getFile() {
@@ -51,23 +50,26 @@ public class HeapFile implements DbFile {
      * HeapFile has a "unique id," and that you always return the same value for
      * a particular HeapFile. We suggest hashing the absolute file name of the
      * file underlying the heapfile, i.e. f.getAbsoluteFile().hashCode().
-     * 
+     *
      * @return an ID uniquely identifying this HeapFile.
      */
+    @Override
     public int getId() {
         return this.file.getAbsoluteFile().hashCode();
     }
 
     /**
      * Returns the TupleDesc of the table stored in this DbFile.
-     * 
+     *
      * @return TupleDesc of this DbFile.
      */
+    @Override
     public TupleDesc getTupleDesc() {
         return this.tupleDesc;
     }
 
     // see DbFile.java for javadocs
+    @Override
     public Page readPage(PageId pid) {
         try {
             RandomAccessFile rf = new RandomAccessFile(file, "r");
@@ -86,6 +88,7 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
+    @Override
     public void writePage(Page page) {
         try {
             RandomAccessFile rf = new RandomAccessFile(file, "rw");
@@ -93,7 +96,7 @@ public class HeapFile implements DbFile {
             rf.write(page.getPageData());
             rf.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
 
     }
@@ -106,6 +109,7 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
+    @Override
     public List<Page> insertTuple(TransactionId tid, Tuple t)
             throws DbException, IOException, TransactionAbortedException {
         List<Page> pages = new ArrayList<>();
@@ -129,6 +133,7 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
+    @Override
     public List<Page> deleteTuple(TransactionId tid, Tuple t) throws DbException,
             TransactionAbortedException {
         List<Page> pages = new ArrayList<>();
@@ -158,7 +163,7 @@ public class HeapFile implements DbFile {
 
         @Override
         public void open() throws DbException, TransactionAbortedException {
-            HeapPageId firstPageId = new HeapPageId(getId(),0);
+            HeapPageId firstPageId = new HeapPageId(getId(), 0);
             currPage = (HeapPage) Database.getBufferPool().getPage(tid, firstPageId, Permissions.READ_ONLY);
             currTupleIter = currPage.iterator();
         }
@@ -166,14 +171,14 @@ public class HeapFile implements DbFile {
         @Override
         protected Tuple readNext() throws DbException, TransactionAbortedException {
             // currPage has no more tuple to iterate, set null
-            if (currTupleIter != null && !currTupleIter.hasNext()){
+            if (currTupleIter != null && !currTupleIter.hasNext()) {
                 currTupleIter = null;
             }
             while (currTupleIter == null && currPage != null) {
                 HeapPageId nextPid = null;
                 HeapPageId currPid = currPage.pid;
                 if (currPid.getPageNumber() < numPages() - 1) {
-                    nextPid = new HeapPageId(getId(),currPid.getPageNumber() + 1);
+                    nextPid = new HeapPageId(getId(), currPid.getPageNumber() + 1);
                 }
                 if (nextPid == null) {
                     currPage = null;
@@ -208,6 +213,7 @@ public class HeapFile implements DbFile {
     }
 
     // see DbFile.java for javadocs
+    @Override
     public DbFileIterator iterator(TransactionId tid) {
         return new HeapFileIterator(tid, this);
     }

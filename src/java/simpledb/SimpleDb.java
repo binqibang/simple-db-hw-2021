@@ -1,4 +1,5 @@
 package simpledb;
+
 import simpledb.common.DbException;
 import simpledb.common.Type;
 import simpledb.common.Utility;
@@ -7,9 +8,10 @@ import simpledb.transaction.TransactionAbortedException;
 import simpledb.transaction.TransactionId;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class SimpleDb {
-    public static void main (String[] args)
+    public static void main(String[] args)
             throws DbException, TransactionAbortedException {
         // convert a file
         switch (args[0]) {
@@ -25,10 +27,9 @@ public class SimpleDb {
                     Type[] ts = new Type[numOfAttributes];
                     char fieldSeparator = ',';
 
-                    if (args.length == 3)
-                        for (int i = 0; i < numOfAttributes; i++)
-                            ts[i] = Type.INT_TYPE;
-                    else {
+                    if (args.length == 3) {
+                        Arrays.fill(ts, Type.INT_TYPE);
+                    } else {
                         String typeString = args[3];
                         String[] typeStringAr = typeString.split(",");
                         if (typeStringAr.length != numOfAttributes) {
@@ -37,17 +38,18 @@ public class SimpleDb {
                         }
                         int index = 0;
                         for (String s : typeStringAr) {
-                            if (s.equalsIgnoreCase("int"))
+                            if ("int".equalsIgnoreCase(s)) {
                                 ts[index++] = Type.INT_TYPE;
-                            else if (s.equalsIgnoreCase("string"))
+                            } else if ("string".equalsIgnoreCase(s)) {
                                 ts[index++] = Type.STRING_TYPE;
-                            else {
+                            } else {
                                 System.err.println("Unknown type " + s);
                                 return;
                             }
                         }
-                        if (args.length == 5)
+                        if (args.length == 5) {
                             fieldSeparator = args[4].charAt(0);
+                        }
                     }
 
                     HeapFileEncoder.convert(sourceTxtFile, targetDatFile,
@@ -91,7 +93,7 @@ public class SimpleDb {
                     System.out.println("Class Parser not found -- perhaps you are trying to run the parser as a part of lab1?");
                 } catch (Exception e) {
                     System.out.println("Error in parser.");
-                    e.printStackTrace();
+                    System.err.println(e.getMessage());
                 }
 
                 break;

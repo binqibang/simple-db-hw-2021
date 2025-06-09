@@ -119,6 +119,7 @@ public class IntAggregator implements Aggregator {
      * @param tup
      *            the Tuple containing an aggregate field and a group-by field
      */
+    @Override
     public void mergeTupleIntoGroup(Tuple tup) {
         IntField aggField = (IntField) tup.getField(afield);
         Field gbField = gbfield == NO_GROUPING ? null : tup.getField(gbfield);
@@ -133,6 +134,7 @@ public class IntAggregator implements Aggregator {
      *         aggregateVal is determined by the type of aggregate specified in
      *         the constructor.
      */
+    @Override
     public OpIterator iterator() {
         List<Tuple> resTuples = new ArrayList<>();
         for (Map.Entry<Field, Integer> entry : handler.aggResult.entrySet()) {
